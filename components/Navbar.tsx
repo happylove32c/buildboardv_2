@@ -3,25 +3,26 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { Home, FolderKanban, PlusSquare, User } from "lucide-react"
+import { Home, FolderKanban, PlusSquare, LayoutDashboard, User } from "lucide-react"
 import { Button } from "./ui/button"
 import { useState } from "react"
 import AuthModal from "./AuthModal"
+import AuthFormModal from "./AuthForm"
 
 export default function Navbar() {
-  const [authOpen, setAuthOpen] = useState(false)
+  const [openModal, setOpenModal] = useState(false)
   const pathname = usePathname()
 
   const navLinks = [
-    { href: "/", label: "Dashboard", icon: Home },
-    { href: "/projects", label: "Projects", icon: FolderKanban },
+    { href: "/", label: "Home", icon: Home },
+    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/new", label: "New", icon: PlusSquare },
   ]
 
   return (
     <>
       {/* Desktop Top Nav */}
-      <nav className="hidden sm:flex w-full border-b bg-white px-4 py-3 shadow-sm">
+      <nav className="hidden sm:flex fixed top-0 z-50 w-full border-b bg-white px-4 py-3 shadow-sm">
         <div className="flex items-center justify-between max-w-6xl mx-auto w-full">
           <Link href="/" className="text-xl font-bold text-black">
             Buildboard
@@ -43,7 +44,7 @@ export default function Navbar() {
             ))}
 
             <Button
-              onClick={() => setAuthOpen(true)}
+              onClick={() => setOpenModal(true)}
             >Sign up</Button>
           </div>
         </div>
@@ -66,7 +67,7 @@ export default function Navbar() {
           ))}
         </div>
       </nav>
-      <AuthModal open={authOpen} setOpen={setAuthOpen} />
+      <AuthFormModal open={openModal} setOpen={setOpenModal} />
     </>
   )
 }
