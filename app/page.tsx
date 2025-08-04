@@ -1,8 +1,14 @@
+"use client"
+
+import { useState } from "react"
 import Navbar from "@/components/Navbar"
 import { Button } from "@/components/ui/button"
-import { Ghost } from "lucide-react" // Radix-style icon via Lucide
+import { Ghost } from "lucide-react"
+import AuthModal from "@/components/AuthModal"
 
 export default function Home() {
+  const [authOpen, setAuthOpen] = useState(false)
+
   return (
     <>
       <div className="min-h-screen flex flex-col">
@@ -19,11 +25,14 @@ export default function Home() {
             Sign in to get started with your first project.
           </p>
 
-          <Button>
+          <Button onClick={() => setAuthOpen(true)}>
             Sign In
           </Button>
         </main>
       </div>
+
+      {/* Mount modal */}
+      <AuthModal open={authOpen} setOpen={setAuthOpen} />
     </>
   )
 }

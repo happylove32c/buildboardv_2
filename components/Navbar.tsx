@@ -5,12 +5,15 @@ import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Home, FolderKanban, PlusSquare, User } from "lucide-react"
 import { Button } from "./ui/button"
+import { useState } from "react"
+import AuthModal from "./AuthModal"
 
 export default function Navbar() {
+  const [authOpen, setAuthOpen] = useState(false)
   const pathname = usePathname()
 
   const navLinks = [
-    { href: "/", label: "Home", icon: Home },
+    { href: "/", label: "Dashboard", icon: Home },
     { href: "/projects", label: "Projects", icon: FolderKanban },
     { href: "/new", label: "New", icon: PlusSquare },
   ]
@@ -39,7 +42,9 @@ export default function Navbar() {
               </Link>
             ))}
 
-            <Button>Sign up</Button>
+            <Button
+              onClick={() => setAuthOpen(true)}
+            >Sign up</Button>
           </div>
         </div>
       </nav>
@@ -61,6 +66,7 @@ export default function Navbar() {
           ))}
         </div>
       </nav>
+      <AuthModal open={authOpen} setOpen={setAuthOpen} />
     </>
   )
 }
