@@ -1,9 +1,13 @@
-export default function Navbar() {
-    return(
-        <>
-            <div className="bg-gray-50 min-h-screen p-4 flex items-center justify-center pt-16">
-                <h1 className="text-3xl">Welcome to the dashboard</h1>
-            </div>
-        </>
-    )
+// app/dashboard/page.tsx
+import PrivateRoute from "@/components/PrivateRoute"
+
+export default function DashboardPage() {
+  return (
+    <PrivateRoute>
+      <div className="sm:pt-16">
+        <h1 className="text-xl font-bold">Dashboard</h1>
+        <p>Welcome to your dashboard!</p>
+      </div>
+    </PrivateRoute>
+  )
 }

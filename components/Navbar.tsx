@@ -3,21 +3,31 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { Home, FolderKanban, PlusSquare, LayoutDashboard, User } from "lucide-react"
+import {
+  Home,
+  PlusSquare,
+  LayoutDashboard,
+} from "lucide-react"
 import { Button } from "./ui/button"
 import { useState } from "react"
-import AuthModal from "./AuthModal"
 import AuthFormModal from "./AuthForm"
+import { useAuth } from "@/context/AuthContext"
 
 export default function Navbar() {
   const [openModal, setOpenModal] = useState(false)
   const pathname = usePathname()
+  const { user, logout } = useAuth() // 👈 auth context
 
-  const navLinks = [
+  // Base links
+  const baseLinks = [
     { href: "/", label: "Home", icon: Home },
-    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/new", label: "New", icon: PlusSquare },
   ]
+
+  // Only show dashboard if logged in
+  const navLinks = user
+    ? [...baseLinks, { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard }]
+    : baseLinks
 
   return (
     <>
@@ -43,9 +53,11 @@ export default function Navbar() {
               </Link>
             ))}
 
-            <Button
-              onClick={() => setOpenModal(true)}
-            >Sign up</Button>
+            {user ? (
+              <Button onClick={logout}>Logout</Button>
+            ) : (
+              <Button onClick={() => setOpenModal(true)}>Sign In</Button>
+            )}
           </div>
         </div>
       </nav>
@@ -58,7 +70,7 @@ export default function Navbar() {
               key={href}
               href={href}
               className={cn(
-                "flex flex-col items-center text-xs text-muted-foreground transition-colors",
+                "flex flex-col items-center text-xs transition-colors",
                 pathname === href ? "text-black" : "text-muted-foreground"
               )}
             >
@@ -67,6 +79,8 @@ export default function Navbar() {
           ))}
         </div>
       </nav>
+
+      {/* Auth Modal */}
       <AuthFormModal open={openModal} setOpen={setOpenModal} />
     </>
   )
