@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button"
 import { Dispatch, SetStateAction, useState } from "react"
 import { DialogOverlay, DialogPortal } from "@radix-ui/react-dialog"
 
+
 export default function AuthModal({
   open,
   setOpen,

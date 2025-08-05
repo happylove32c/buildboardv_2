@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Dispatch, SetStateAction, useState } from "react"
+import { useAuth } from "@/context/AuthContext"
 
 export default function AuthFormModal({
   open,
@@ -25,30 +26,37 @@ export default function AuthFormModal({
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
 
+  const { login } = useAuth() // ✅ moved to top-level
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
 
     const endpoint = isLogin ? "/api/login" : "/api/register"
     const payload = isLogin
-      ? { username, password } // login with username
+      ? { username, password }
       : { email, username, password }
 
-    const res = await fetch(endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    })
+    try {
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      })
 
-    setLoading(false)
-
-    if (res.ok) {
       const result = await res.json()
-      console.log(`✅ ${isLogin ? "Logged in" : "Registered"}:`, result)
-      setOpen(false)
-    } else {
-      const error = await res.json()
-      console.error(`❌ ${isLogin ? "Login" : "Registration"} error:`, error)
+      setLoading(false)
+
+      if (res.ok) {
+        console.log(`✅ ${isLogin ? "Logged in" : "Registered"}:`, result)
+        login(result.user) // ✅ update global context
+        setOpen(false)
+      } else {
+        console.error(`❌ ${isLogin ? "Login" : "Registration"} error:`, result)
+      }
+    } catch (error) {
+      console.error("❌ Network/server error:", error)
+      setLoading(false)
     }
   }
 
