@@ -1,21 +1,36 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
-import AuthFormModal from "@/components/AuthForm"
 import { useAuth } from "@/context/AuthContext"
 import { useRouter } from "next/navigation"
+import AuthModal from "@/components/AuthModal"
+import { supabase } from "@/lib/supabaseClient"
 
 export default function Home() {
   const { user } = useAuth()
-  const [openModal, setOpenModal] = useState(false)
+  const [fullName, setFullName] = useState<string | null>(null)
+  const [open, setOpen] = useState(false)
   const router = useRouter()
+
+  // Fetch user's full name if available
+  useEffect(() => {
+    if (!user) return
+    const fetchUser = async () => {
+      const { data } = await supabase.auth.getUser()
+      if (data?.user) {
+        setFullName(data.user.user_metadata.full_name)
+      }
+    }
+    fetchUser()
+  }, [user])
 
   const handleClick = () => {
     if (user) {
-      router.push("/dashboard") // or "/dashboard/username" if dynamic
+      console.log(user.email)
+      router.push("/dashboard")
     } else {
-      setOpenModal(true)
+      setOpen(true)
     }
   }
 
@@ -25,15 +40,19 @@ export default function Home() {
         {user ? (
           <>
             <h1 className="text-xl font-semibold mb-2 text-gray-900">
-              Hello, {user.username} 👋
+              Hello, {fullName || user.email} 👋
             </h1>
             <p className="text-muted-foreground mb-6">Welcome back!</p>
           </>
         ) : (
           <>
-            <img src="https://www.svgrepo.com/show/494799/ghost.svg" alt="" className="h-24" />
+            <img
+              src="https://www.svgrepo.com/show/494799/ghost.svg"
+              alt="Empty State"
+              className="h-24"
+            />
             <h1 className="text-xl font-semibold mb-2 text-gray-900">
-              There's nothing here
+              There&apos;s nothing here
             </h1>
             <p className="text-muted-foreground mb-6">
               Sign in to get started with your first project.
@@ -46,7 +65,7 @@ export default function Home() {
         </Button>
       </main>
 
-      <AuthFormModal open={openModal} setOpen={setOpenModal} />
+      <AuthModal open={open} setOpen={setOpen} />
     </div>
   )
 }

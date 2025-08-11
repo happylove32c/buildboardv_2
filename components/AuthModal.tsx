@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Dispatch, SetStateAction, useState } from "react"
 import { DialogOverlay, DialogPortal } from "@radix-ui/react-dialog"
+import { supabase } from "@/lib/supabaseClient"
 
 
 export default function AuthModal({
@@ -20,6 +21,18 @@ export default function AuthModal({
   open: boolean
   setOpen: Dispatch<SetStateAction<boolean>>
 }){
+
+    const handleGoogleLogin = async () => {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+      if (error) console.error("Error logging in:", error.message);
+      else console.log(await supabase.auth.getUser())
+
+    };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -34,7 +47,7 @@ export default function AuthModal({
                     </DialogHeader>
 
                       <div className="grid gap-3 mt-4">
-                        <Button
+                        <Button onClick={handleGoogleLogin}
                             variant="outline"
                             className="w-full flex items-center p-8 gap-2"
                         >
