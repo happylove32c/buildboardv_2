@@ -21,45 +21,56 @@ export default function NewIdea() {
     setTag(value === tag ? "" : value)
   }
 
-  const handleSubmit = async () => {
-    if (!idea.trim()) return
+const handleSubmit = async () => {
+  if (!idea.trim()) return
 
-    setLoading(true)
-    const finalTag = tag || "Miscellaneous"
+  setLoading(true)
+  try {
+    // Call your Next.js API to get AI-generated title and MVP
+    const response = await fetch("/api/generateMvp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ rawIdea: idea }),
+    })
 
-    try {
-      const user = supabase.auth.getUser()  // or get from your auth context if available
-      // If using your useAuth, get user ID from there instead
-
-      const { data, error } = await supabase.from("projects").insert([
-        {
-          user_id: (await user).data.user?.id, // adjust according to your auth method
-          title: finalTag,
-          raw_idea: idea,
-          mvp_description: "", // empty for now, AI can fill later
-          build_steps: [],     // empty array
-          status: "draft",
-        },
-      ])
-
-      if (error) {
-        alert("Failed to save idea: " + error.message)
-        setLoading(false)
-        return
-      }
-
-      setIdea("")
-      setTag("")
-      // alert("Idea saved successfully!")
-
-      // Optionally redirect to dashboard or project page
-      router.push("/dashboard")
-    } catch (err) {
-      alert("Unexpected error: " + err)
-    } finally {
-      setLoading(false)
+    if (!response.ok) {
+      throw new Error("Failed to generate MVP")
     }
+
+    const aiData = await response.json()
+    const generatedTitle = aiData.title || tag || "Miscellaneous"
+    const generatedMvp = aiData.mvp_description || ""
+
+    // Get current user from supabase auth or your auth context
+    const user = await supabase.auth.getUser()
+
+    const { error } = await supabase.from("projects").insert([
+      {
+        user_id: user.data.user?.id,
+        title: generatedTitle,
+        raw_idea: idea,
+        mvp_description: generatedMvp,
+        build_steps: [],
+        status: "draft",
+      },
+    ])
+
+    if (error) {
+      alert("Failed to save idea: " + error.message)
+      setLoading(false)
+      return
+    }
+
+    setIdea("")
+    setTag("")
+    router.push("/dashboard")
+  } catch (err: any) {
+    alert(err.message || "Unexpected error")
+  } finally {
+    setLoading(false)
   }
+}
+  // Adjust textarea height based on content
 
   useEffect(() => {
     if (textareaRef.current) {
